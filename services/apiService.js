@@ -178,6 +178,16 @@ export const generateChatResponse = async (payload) => {
     }
   };
 
+  export const generateConversationSummary = async (sessionId) => {
+    try {
+      const response = await api.get(`/chat/session/${sessionId}/generate-summary`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error generating conversation summary:", error);
+      throw error.response?.data || error;
+    }
+  };
+
   export const getMoodCountBySessionId = async (sessionId) => {
     try {
       const response = await api.get(`/chat/session/${sessionId}/moods`);

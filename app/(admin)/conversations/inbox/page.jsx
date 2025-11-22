@@ -8,7 +8,7 @@ import DataTable from '@/components/tables/DataTable';
 import { useAppContext } from '@/context/AppContext';
 import useConversations from '@/hooks/useConversations';
 import ConversationRow from '@/components/conversations/ConversationRow';
-import { getConversationSummary, getConversationMessages, emailConversationSummary, takeOverSession } from '@/services/apiService';
+import { getConversationSummary, getConversationMessages, emailConversationSummary, takeOverSession, generateConversationSummary } from '@/services/apiService';
 import SummaryModal from '@/components/modals/SummaryModal';
 import ConversationHistoryModal from '@/components/modals/ConversationHistoryModal';
 import { toast } from 'react-hot-toast';
@@ -93,6 +93,7 @@ const handleSendEmail = async (sessionId, type) => {
       if (!session) return;
   
       const response = await getConversationSummary(sessionId);
+      console.log('response DATA SUMMARY', response);
       console.log('Summary fetched for session:', response);
       setSummaryModal({
         isOpen: true,
@@ -111,9 +112,13 @@ const handleSendEmail = async (sessionId, type) => {
   const handleGenerateSummary = async (sessionId) => {
     try {
       setGeneratingSummary(sessionId);
-      console.log('Generating summary for session:', sessionId);
+      console.log('Generating summary for sddawww2session:', sessionId);
       const response = await getConversationSummary(sessionId);
       console.log('Summary generated for session:', response);
+      if (!response) {
+        const summaryResponse = await generateConversationSummary(sessionId);
+        console.log('Summary generated for session:', summaryResponse);
+      }
       // Refresh to update the summary status
       await refreshConversations();
     } catch (error) {
