@@ -29,7 +29,7 @@ const navItems = [
     name: "Conversations",
     subItems: [
       { name: "Inbox", path: "/conversations/inbox", pro: false },
-      { name: "Escalated", path: "/conversations/escalated", pro: false },
+      //{ name: "Escalated", path: "/conversations/escalated", pro: false },
     ],
   },
   {
@@ -37,7 +37,7 @@ const navItems = [
     name: "Alerts",
     subItems: [
       { name: "Overview", path: "/alerts", pro: false },
-      { name: "Escalation Rules", path: "/alerts/rules", pro: false },
+     // { name: "Escalation Rules", path: "/alerts/rules", pro: false },
     ],
   },
   {
@@ -47,6 +47,7 @@ const navItems = [
       { name: "My Documents", path: "/files", pro: false },
     ],
   },
+  /**
   {
     icon: <PieChartIcon />,
     name: "Analytics",
@@ -56,6 +57,7 @@ const navItems = [
       { name: "Sessions", path: "/analytics/sessions", pro: false },
     ],
   },
+  */
   {
     icon: <Settings />,
     name: "Settings",

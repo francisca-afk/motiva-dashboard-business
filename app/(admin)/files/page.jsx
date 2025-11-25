@@ -28,7 +28,7 @@ export default function BusinessFiles() {
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "text/plain",
-    "text/markdown",
+  //  "text/markdown",
   ];
 
   const handleFileSelect = (event) => {
@@ -43,8 +43,8 @@ export default function BusinessFiles() {
     }
 
     // Validate file type
-    if (!ALLOWED_TYPES.includes(file.type) && !file.name.match(/\.(pdf|doc|docx|txt|md)$/i)) {
-      setErrorMessage("Invalid file type. Please upload PDF, DOC, DOCX, TXT, or MD files.");
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setErrorMessage("Invalid file type. Please upload PDF, DOC or DOCX.");
       setUploadStatus("error");
       return;
     }
@@ -74,7 +74,7 @@ const handleUpload = async () => {
 
     // Process file
     setUploadStatus("processing");
-    console.log("⚙️ Processing file:", fileId);
+    console.log("Processing file:", fileId);
     await processKnowledgeFile(fileId);
 
     // Refresh file list after 2 seconds
@@ -184,7 +184,7 @@ const handleCancelUpload = () => {
                 className="mt-2"
               />
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Supported formats: PDF, DOC, DOCX, TXT, MD. Max size: 10MB
+                Supported formats: PDF, DOC, DOCX, TXT. Max size: 10MB
               </p>
             </div>
 
@@ -315,7 +315,7 @@ const handleCancelUpload = () => {
                       </div>
                       <div className="flex flex-col">
                         <a
-                          href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${file.fileUrl}`}
+                          href={file.fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="font-medium text-gray-800 hover:text-brand-600 dark:text-white/90 dark:hover:text-brand-400 transition-colors"
@@ -386,10 +386,7 @@ const handleCancelUpload = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() =>
-                          window.open(
-                            `${process.env.NEXT_PUBLIC_BACKEND_URL}/${file.fileUrl}`,
-                            "_blank"
-                          )
+                          window.open(file.fileUrl, "_blank")
                         }
                         className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5 transition-colors"
                         title="View file"
