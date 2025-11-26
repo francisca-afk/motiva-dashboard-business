@@ -112,9 +112,7 @@ const handleSendEmail = async (sessionId, type) => {
   const handleGenerateSummary = async (sessionId) => {
     try {
       setGeneratingSummary(sessionId);
-      console.log('Generating summary for sddawww2session:', sessionId);
       const response = await getConversationSummary(sessionId);
-      console.log('Summary generated for session:', response);
       if (!response) {
         const summaryResponse = await generateConversationSummary(sessionId);
         console.log('Summary generated for session:', summaryResponse);

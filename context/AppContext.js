@@ -17,7 +17,7 @@ export const AppProvider = ({ children }) => {
   const [alerts, setAlerts] = useState([]);
   const [socket, setSocket] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeConversations, setActiveConversations] = useState(new Set());
+  const [acknowledgedSessions, setAcknowledgedSessions] = useState(new Set());
   
   const pathname = usePathname();
   const router = useRouter();
@@ -69,9 +69,6 @@ export const AppProvider = ({ children }) => {
   };
   
   useEffect(() => {
-    console.log("pathname", pathname);
-    console.log("user", user);
-    console.log("business", business);
     if (!user || business || pathname === '/setup') return;
   
     const fetchBusiness = async () => {
@@ -125,12 +122,11 @@ export const AppProvider = ({ children }) => {
     });
   
     socketInstance.on("connect", () => {
-      console.log(`✅ Socket connected: ${socketInstance.id}`);
       socketInstance.emit("join_business_conversations", business._id);
       socketInstance.emit("join_alerts", business._id);
     });
   
-    // Business conversations room confirmation (ALL CONVERSATIONS)
+    // Business conversations room confirmation
     socketInstance.on("joined_business_conversations", ({ room }) => {
       console.log(`✅ Joined business conversations room: ${room}`);
     });
@@ -162,6 +158,11 @@ export const AppProvider = ({ children }) => {
         });
       }
     });
+
+    socketInstance.on("client_acknowledged_handoff", (data) => {
+      console.log("Client acknowledged handoff from app context:", data);
+      setAcknowledgedSessions(prev => new Set([...prev, data.sessionId]));
+    })
   
     socketInstance.on("new_alert", (alert) => {
       console.log("🔔 New alert received:", alert);
@@ -236,7 +237,9 @@ export const AppProvider = ({ children }) => {
         logout, 
         sendMessage, 
         sendTypingIndicator,
-        socket }}
+        socket,
+        acknowledgedSessions 
+      }}
     >
       {children}
     </AppContext.Provider>

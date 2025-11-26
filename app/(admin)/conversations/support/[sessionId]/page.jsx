@@ -20,6 +20,7 @@ import Input from '@/components/form/input/InputField';
 import Badge from '@/components/ui/badge/Badge';
 import ReactMarkdown from 'react-markdown';
 import { getConversationMessages } from '@/services/apiService';
+import { toast } from 'react-hot-toast';
 
 export default function SupportChatPage() {
   const params = useParams();
@@ -28,7 +29,8 @@ export default function SupportChatPage() {
   const { 
     socket, 
     sendMessage,
-    sendTypingIndicator 
+    sendTypingIndicator,
+    acknowledgedSessions
   } = useAppContext();
   
   const [messages, setMessages] = useState([]);
@@ -36,6 +38,8 @@ export default function SupportChatPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [conversationData, setConversationData] = useState(null);
   const [attachments, setAttachments] = useState([]);
+  const [clientAcknowledged, setClientAcknowledged] = useState(false);
+
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -82,6 +86,16 @@ export default function SupportChatPage() {
     };
   }, [socket, sessionId])
 
+  // Check if already acknowledged from context
+  useEffect(() => {
+    console.log('acknowledgedSessions', acknowledgedSessions);
+    console.log('sessionId', sessionId);
+    if (acknowledgedSessions.has(sessionId)) {
+      console.log('Client already acknowledged from context');
+      setClientAcknowledged(true);
+    }
+  }, [acknowledgedSessions, sessionId])
+
   // WebSocket listeners
   useEffect(() => {
     if (!socket) return;
@@ -107,6 +121,14 @@ export default function SupportChatPage() {
       }
     };
 
+    const handleClientAcknowledgment = (data) => {
+      if (data.sessionId === sessionId) {
+        console.log('Client acknowledged handoff in page:', data);
+        setClientAcknowledged(true);
+      }
+    };
+    
+    socket.on('client_acknowledged_handoff', handleClientAcknowledgment);
     socket.on('new_message', handleNewMessage);
     socket.on('user_typing', handleUserTyping);
     socket.on('user_stopped_typing', handleUserStoppedTyping);
@@ -115,6 +137,7 @@ export default function SupportChatPage() {
       socket.off('new_message', handleNewMessage);
       socket.off('user_typing', handleUserTyping);
       socket.off('user_stopped_typing', handleUserStoppedTyping);
+      socket.off('client_acknowledged_handoff', handleClientAcknowledgment)
     };
   }, [socket, sessionId]);
 
@@ -173,7 +196,7 @@ export default function SupportChatPage() {
   };
 
   const handleBack = () => {
-    router.push('/conversations');
+    router.push('/conversations/inbox');
   };
 
   return (
@@ -328,6 +351,30 @@ export default function SupportChatPage() {
                 )}
               </div>
             ))}
+
+            {/* Client Acknowledgment Notification */}
+            {clientAcknowledged && (
+              <div className="flex justify-center px-4 py-2">
+                <div className="max-w-md w-full bg-gradient-to-r from-success-400 via-success-500 to-emerald-500 rounded-2xl px-5 py-3.5 shadow-lg border border-success-300/20">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-9 h-9 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center ring-2 ring-white/20">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-white">
+                        Client Notified
+                      </p>
+                      <p className="text-xs text-white/95 mt-0.5">
+                        The visitor knows you've joined
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <div className="w-2 h-2 bg-white rounded-full shadow-sm"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Typing Indicator */}
             {isTyping && (

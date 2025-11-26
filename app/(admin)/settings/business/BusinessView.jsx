@@ -216,17 +216,19 @@ export default function BusinessView({ business, onEdit, showEdit = false }) {
             {/* Embed Code */}
             <div className="rounded-lg bg-gradient-to-br from-purple-50 to-brand-50 dark:from-purple-500/10 dark:to-brand-500/10 p-6 border border-purple-200 dark:border-purple-500/20">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Add this code to your website to embed the chatbot widget
+                Add this script to your website's <code className="px-2 py-1 bg-white dark:bg-gray-800 rounded text-xs">&lt;head&gt;</code> section
               </p>
               <div className="space-y-3">
                 <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                   <code className="text-xs text-gray-800 dark:text-gray-300 font-mono break-all">
-                    {`<iframe src="${process.env.NEXT_PUBLIC_WIDGET_URL}/?businessId=${business._id}" style="position:fixed;bottom:20px;right:20px;width:400px;height:600px;border:none;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:9999"></iframe>`}
+                    {`<script src="${process.env.NEXT_PUBLIC_BACKEND_URL}/widget/embed.js" data-business-id="${business._id}"></script>`}
                   </code>
                 </div>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(`<iframe src="${process.env.NEXT_PUBLIC_WIDGET_URL}/?businessId=${business._id}" style="position:fixed;bottom:20px;right:20px;width:400px;height:600px;border:none;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:9999"></iframe>`);
+                    navigator.clipboard.writeText(
+                      `<script src="${process.env.NEXT_PUBLIC_BACKEND_URL}/widget/embed.js" data-business-id="${business._id}"></script>`
+                    );
                   }}
                   className="w-full px-4 py-2 rounded-lg bg-purple-500 text-white font-medium hover:bg-purple-600 transition-colors inline-flex items-center justify-center gap-2"
                 >
