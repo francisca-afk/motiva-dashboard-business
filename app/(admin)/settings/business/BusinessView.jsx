@@ -16,8 +16,12 @@ import {
 import ComponentCard from '@/components/common/ComponentCard';
 import Badge from '@/components/ui/badge/Badge';
 import { getToneIcon, getSectorIcon, getSectorLabel } from '@/lib/business';
+import toast from 'react-hot-toast';
 
 export default function BusinessView({ business, onEdit, showEdit = false }) {
+  if ( !business) {
+    return;
+  }
   return (
     <div className="max-w-4xl mx-auto">
       {/* Business Details Card */}
@@ -27,7 +31,7 @@ export default function BusinessView({ business, onEdit, showEdit = false }) {
           <div className="flex items-start gap-6 pb-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex-shrink-0">
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-brand-50 to-purple-50 dark:from-brand-500/10 dark:to-purple-500/10 flex items-center justify-center overflow-hidden border-2 border-brand-200 dark:border-brand-500/20">
-                {business.logoUrl ? (
+                {business?.logoUrl? (
                   <img src={business.logoUrl} alt="Logo" className="w-full h-full object-cover" />
                 ) : (
                   <Building2 className="h-10 w-10 text-brand-600 dark:text-brand-400" />
@@ -191,9 +195,20 @@ export default function BusinessView({ business, onEdit, showEdit = false }) {
                   </code>
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_WIDGET_URL}/demo?businessId=${business._id}`);
+                <button
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_WIDGET_URL}/demo?businessId=${business._id}`);
+                        toast.success('Demo URL copied to clipboard!', {
+                          duration: 3000,
+                          position: 'top-center',
+                        });
+                      } catch (err) {
+                        toast.error('Failed to copy demo URL to clipboard', {
+                          duration: 3000,
+                          position: 'top-center',
+                        });
+                      }
                     }}
                     className="flex-1 px-4 py-2 rounded-lg bg-success-500 text-white font-medium hover:bg-success-600 transition-colors inline-flex items-center justify-center gap-2"
                   >
@@ -229,6 +244,10 @@ export default function BusinessView({ business, onEdit, showEdit = false }) {
                     navigator.clipboard.writeText(
                       `<script src="${process.env.NEXT_PUBLIC_BACKEND_URL}/widget/embed.js" data-business-id="${business._id}"></script>`
                     );
+                    toast.success('Embed code copied to clipboard!', {
+                      duration: 3000,
+                      position: 'top-center',
+                    });
                   }}
                   className="w-full px-4 py-2 rounded-lg bg-purple-500 text-white font-medium hover:bg-purple-600 transition-colors inline-flex items-center justify-center gap-2"
                 >

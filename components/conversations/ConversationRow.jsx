@@ -106,7 +106,7 @@ export default function ConversationRow({
             {session.title}
           </button>
           <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-            <span>{formatDate(session.updatedAt)}</span>
+            <span> {formatDate(session.lastMessageAt || session.createdAt)}</span>
           </div>
         </div>
       </td>

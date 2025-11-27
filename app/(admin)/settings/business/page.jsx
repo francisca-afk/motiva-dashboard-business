@@ -6,26 +6,19 @@ import toast, { Toaster } from 'react-hot-toast';
 import PageBreadcrumb from '@/components/common/PageBreadCrumb';
 import { useAppContext } from '@/context/AppContext';
 import BusinessView from './BusinessView';
+import { Loader2 } from 'lucide-react';
 
 export default function BusinessSettingsPage() {
   const router = useRouter();
-  const { business, setBusiness } = useAppContext();
-  const [loading, setLoading] = useState(false);
+  const { business, setBusiness, loading } = useAppContext();
 
-  // Redirect if no business
-  useEffect(() => {
-    if (!business) {
-      router.push('/setup');
-    }
-  }, [business, router]);
-
-  if (!business) {
-    return null;
+  if (loading && !business) {
+    return <Loader2 className="h-8 w-8 animate-spin text-brand-400" />;
   }
 
   const handleEdit = () => {
     router.push('/setup');
-  };
+  }
 
   return (
     <>

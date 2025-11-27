@@ -92,7 +92,6 @@ export const AppProvider = ({ children }) => {
         localStorage.setItem("business", JSON.stringify(data));
       } catch (error) {
         console.error("Error loading business:", error);
-        if (error.response?.status === 404) router.push("/setup");
       }
     };
   
