@@ -30,7 +30,8 @@ export default function SupportChatPage() {
     socket, 
     sendMessage,
     sendTypingIndicator,
-    acknowledgedSessions
+    acknowledgedSessions,
+    addAcknowledgedSession
   } = useAppContext();
   
   const [messages, setMessages] = useState([]);
@@ -58,7 +59,6 @@ export default function SupportChatPage() {
     const loadConversation = async () => {
       try {
         const response = await getConversationMessages(sessionId);
-        console.log('response DATA HISTORY', response);
         setConversationData(response.session);
         setMessages(response.messages || []);
       } catch (error) {
@@ -87,10 +87,9 @@ export default function SupportChatPage() {
   }, [socket, sessionId])
 
   // Check if already acknowledged from context
+  
   useEffect(() => {
-    console.log('acknowledgedSessions', acknowledgedSessions);
-    console.log('sessionId', sessionId);
-    if (acknowledgedSessions.has(sessionId)) {
+    if (!acknowledgedSessions.has(sessionId)) {
       console.log('Client already acknowledged from context');
       setClientAcknowledged(true);
     }
@@ -105,6 +104,9 @@ export default function SupportChatPage() {
       if (data.sessionId === sessionId) {
         setMessages((prev) => [...prev, data.message]);
         setIsTyping(false);
+      }
+      if (data.message.role !== "user") {
+        setClientAcknowledged(false);
       }
     };
 
@@ -122,11 +124,12 @@ export default function SupportChatPage() {
     };
 
     const handleClientAcknowledgment = (data) => {
-      if (data.sessionId === sessionId) {
+      if (data.sessionId === sessionId && !acknowledgedSessions.has(sessionId)) {
         console.log('Client acknowledged handoff in page:', data);
         setClientAcknowledged(true);
+        addAcknowledgedSession(sessionId)
       }
-    };
+    }
     
     socket.on('client_acknowledged_handoff', handleClientAcknowledgment);
     socket.on('new_message', handleNewMessage);
@@ -144,6 +147,8 @@ export default function SupportChatPage() {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputMessage.trim() && attachments.length === 0) return;
+
+    setClientAcknowledged(false);
 
     const messageContent = inputMessage;
     const messageAttachments = [...attachments];
@@ -209,8 +214,8 @@ export default function SupportChatPage() {
         ]}
       />
 
-      <div className="h-[calc(100vh-12rem)] flex flex-col">
-        <ComponentCard className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-12rem)]">
+        <ComponentCard className="flex flex-col flex-1 overflow-y-auto w-full">
           {/* Chat Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -258,7 +263,7 @@ export default function SupportChatPage() {
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4">
             {messages.map((message, index) => (
               <div
                 key={message._id || index}

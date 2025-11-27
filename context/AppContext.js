@@ -67,6 +67,10 @@ export const AppProvider = ({ children }) => {
     setBusiness(null);  
     router.push("/signin");
   };
+
+  const addAcknowledgedSession = (sessionId) => {
+    setAcknowledgedSessions(prev => new Set([...prev, sessionId]))
+  }
   
   useEffect(() => {
     if (!user || business || pathname === '/setup') return;
@@ -139,7 +143,6 @@ export const AppProvider = ({ children }) => {
       
       const { sessionId, message, sessionData } = data;
       
-      // Only show toast if NOT in the chat page for this conversation
       const isInChatPage = pathname?.includes(`/support/chat/${sessionId}`);
       
       if (!isInChatPage && message.role === 'user') {
@@ -237,7 +240,8 @@ export const AppProvider = ({ children }) => {
         sendMessage, 
         sendTypingIndicator,
         socket,
-        acknowledgedSessions 
+        acknowledgedSessions,
+        addAcknowledgedSession
       }}
     >
       {children}
