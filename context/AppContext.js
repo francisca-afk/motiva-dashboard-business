@@ -142,24 +142,14 @@ export const AppProvider = ({ children }) => {
       console.log("💬 New message in conversation:", data);
       
       const { sessionId, message, sessionData } = data;
-      
       const isInChatPage = pathname?.includes(`/support/chat/${sessionId}`);
       
       if (!isInChatPage && message.role === 'user') {
-        toast.custom((t) => (
-          <MessageNotificationToast
-            t={t}
-            conversationId={sessionId}
-            userName={sessionData?.userId?.name}
-            messageContent={message.content}
-            onNavigate={(id) => router.push(`/support/chat/${id}`)}
-          />
-        ), {
-          duration: 8000,
-          position: 'top-right',
-        });
+        window.dispatchEvent(new CustomEvent('show_message_notification', { 
+          detail: { sessionId, message, sessionData }
+        }));
       }
-    });
+    })
 
     socketInstance.on("client_acknowledged_handoff", (data) => {
       console.log("Client acknowledged handoff from app context:", data);

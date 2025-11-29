@@ -281,3 +281,14 @@ export const generateChatResponse = async (payload) => {
       throw error.response?.data || error;
     }
   };
+
+  export const updateBusinessTheme = async (businessId, themeColors) => {
+    console.log('themeColors from api service', themeColors);
+    try {
+      const response = await api.patch(`/business/${businessId}/theme`, themeColors);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error updating business theme:", error);
+      throw error.response?.data || error;
+    }
+  };

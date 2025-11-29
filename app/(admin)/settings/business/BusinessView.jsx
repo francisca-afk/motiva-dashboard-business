@@ -17,11 +17,32 @@ import ComponentCard from '@/components/common/ComponentCard';
 import Badge from '@/components/ui/badge/Badge';
 import { getToneIcon, getSectorIcon, getSectorLabel } from '@/lib/business';
 import toast from 'react-hot-toast';
+import { updateBusinessTheme } from '@/services/apiService';
+import ThemeCustomizer from '@/components/settings/ThemeCustomizer';
 
 export default function BusinessView({ business, onEdit, showEdit = false }) {
   if ( !business) {
     return;
   }
+
+  const handleThemeSave = async (colors) => {
+    try {
+      console.log('colors form business view', colors);
+      const response = await updateBusinessTheme(business._id, colors);
+      console.log('response', response.data);
+      toast.success('Theme colors updated successfully! check the chatbot to see the changes', {
+        duration: 3000,
+        position: 'top-center',
+      });
+      // Optional: refresh business data to update UI
+    } catch (error) {
+      toast.error('Failed to update theme colors', {
+        duration: 3000,
+        position: 'top-center',
+      });
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto">
       {/* Business Details Card */}
@@ -149,7 +170,7 @@ export default function BusinessView({ business, onEdit, showEdit = false }) {
               <Settings className="h-4 w-4 text-gray-500" />
               Chatbot Configuration
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
               <div className="rounded-lg bg-gradient-to-br from-brand-50 to-purple-50 dark:from-brand-500/10 dark:to-purple-500/10 p-4 border border-brand-200 dark:border-brand-500/20">
                 <div className="flex items-center gap-2 mb-2">
                   <MessageSquare className="h-5 w-5 text-brand-600 dark:text-brand-400" />
@@ -174,6 +195,8 @@ export default function BusinessView({ business, onEdit, showEdit = false }) {
                 </p>
               </div>
             </div>
+
+            <ThemeCustomizer business={business} onSave={handleThemeSave} />
           </div>
 
           {/* Chatbot Widget URL */}
