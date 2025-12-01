@@ -17,7 +17,7 @@ import ComponentCard from '@/components/common/ComponentCard';
 import Badge from '@/components/ui/badge/Badge';
 import { getToneIcon, getSectorIcon, getSectorLabel } from '@/lib/business';
 import toast from 'react-hot-toast';
-import { updateBusinessTheme } from '@/services/apiService';
+import { updateBusinessTheme, resetBusinessTheme } from '@/services/apiService';
 import ThemeCustomizer from '@/components/settings/ThemeCustomizer';
 
 export default function BusinessView({ business, onEdit, showEdit = false }) {
@@ -27,9 +27,7 @@ export default function BusinessView({ business, onEdit, showEdit = false }) {
 
   const handleThemeSave = async (colors) => {
     try {
-      console.log('colors form business view', colors);
       const response = await updateBusinessTheme(business._id, colors);
-      console.log('response', response.data);
       toast.success('Theme colors updated successfully! check the chatbot to see the changes', {
         duration: 3000,
         position: 'top-center',
@@ -37,6 +35,21 @@ export default function BusinessView({ business, onEdit, showEdit = false }) {
       // Optional: refresh business data to update UI
     } catch (error) {
       toast.error('Failed to update theme colors', {
+        duration: 3000,
+        position: 'top-center',
+      });
+    }
+  }
+  const handleResetTheme = async () => {
+    try {
+      const response = await resetBusinessTheme(business._id);
+      toast.success('Theme colors reset successfully! check the chatbot to see the changes', {
+        duration: 3000,
+        position: 'top-center',
+      });
+      return response;
+    } catch (error) {
+      toast.error('Failed to reset theme colors', {
         duration: 3000,
         position: 'top-center',
       });
@@ -196,7 +209,7 @@ export default function BusinessView({ business, onEdit, showEdit = false }) {
               </div>
             </div>
 
-            <ThemeCustomizer business={business} onSave={handleThemeSave} />
+            <ThemeCustomizer business={business} onSave={handleThemeSave} onReset={handleResetTheme}/>
           </div>
 
           {/* Chatbot Widget URL */}

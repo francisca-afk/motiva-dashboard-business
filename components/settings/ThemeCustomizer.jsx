@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
-import { Palette, Check } from 'lucide-react';
+import { Palette, Check, RotateCcw } from 'lucide-react';
 
 const ColorPicker = ({ label, color, onChange, description }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,11 +47,12 @@ const ColorPicker = ({ label, color, onChange, description }) => {
   );
 };
 
-function ThemeCustomizer({ business, onSave }) {
+function ThemeCustomizer({ business, onSave, onReset }) {
   const [colors, setColors] = useState({
     primary: business?.chatbotSettings?.theme?.primary || '#b9d825',
     secondary: business?.chatbotSettings?.theme?.secondary || '#7d3f97',
     background: business?.chatbotSettings?.theme?.background || '#f2f6f8e8',
+    backgroundField: business?.chatbotSettings?.theme?.backgroundField || '#f2f6f8e8',
     textMuted: business?.chatbotSettings?.theme?.textMuted || '#646464',
     text: business?.chatbotSettings?.theme?.text || '#646464'
   });
@@ -67,19 +68,50 @@ function ThemeCustomizer({ business, onSave }) {
     }
   };
 
+  const handleResetTheme = async () => {
+    setIsSaving(true);
+    try {
+      const defaultColors = await onReset();
+      setColors({
+        primary: defaultColors.data.primary,
+        secondary: defaultColors.data.secondary,
+        background: defaultColors.data.background,
+        backgroundField: defaultColors.data.backgroundField,
+        textMuted: defaultColors.data.textMuted,
+        text: defaultColors.data.text
+      })
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const hasChanges = 
     colors.primary !== (business?.chatbotSettings?.theme?.primary || '#A8D55F') ||
     colors.secondary !== (business?.chatbotSettings?.theme?.secondary || '#E91E8C') ||
     colors.background !== (business?.chatbotSettings?.theme?.background || '#f2f6f8e8') ||
+    colors.backgroundField !== (business?.chatbotSettings?.theme?.backgroundField || '#f2f6f8e8') ||
     colors.textMuted !== (business?.chatbotSettings?.theme?.textMuted || '#646464') ||
     colors.text !== (business?.chatbotSettings?.theme?.text || '#1F2937');
 
   return (
     <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
-      <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
-        <Palette className="h-4 w-4 text-gray-500" />
-        Theme Colors
-      </div>
+      <div className="flex items-center justify-between mb-4">
+        {/* Left: Icon + Title */}
+        <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <Palette className="h-4 w-4 text-gray-500" />
+          Theme Colors
+        </div>
+
+        {/* Right: Reset Button */}
+        <button
+          onClick={handleResetTheme}
+          className="w-55 px-2 py-2 rounded-lg bg-gradient-to-r from-brand-500 to-purple-500 text-white font-sm hover:from-brand-600 hover:to-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center transition justify-center gap-2"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Reset Original Colors
+        </button>
+
+        </div>
 
       <div className="rounded-lg bg-gradient-to-br from-gray-50 to-purple-50/30 dark:from-gray-800 dark:to-purple-900/10 p-6 border border-gray-200 dark:border-gray-700">
         <div className="space-y-6">
@@ -102,6 +134,12 @@ function ThemeCustomizer({ business, onSave }) {
             description="Background color for the chatbot"
             color={colors.background}
             onChange={(value) => setColors(prev => ({ ...prev, background: value }))}
+          />
+          <ColorPicker
+            label="Background Field Color"
+            description="Background color for the fields (inputs, select, dropdown, etc.)"
+            color={colors.backgroundField}
+            onChange={(value) => setColors(prev => ({ ...prev, backgroundField: value }))}
           />
           <ColorPicker
             label="Text Muted Color"
@@ -137,6 +175,12 @@ function ThemeCustomizer({ business, onSave }) {
                 style={{ backgroundColor: colors.background }}
               >
                 Background
+              </div>
+              <div 
+                className="h-16 flex-1 rounded-lg shadow-sm flex items-center justify-center text-gray-500 font-medium text-sm"
+                style={{ backgroundColor: colors.backgroundField }}
+              >
+                Background Field
               </div>
               <div 
                 className="h-16 flex-1 rounded-lg shadow-sm flex items-center justify-center font-medium text-sm border border-gray-200"

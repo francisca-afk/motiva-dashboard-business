@@ -292,3 +292,13 @@ export const generateChatResponse = async (payload) => {
       throw error.response?.data || error;
     }
   };
+
+  export const resetBusinessTheme = async (businessId) => {
+    try {
+      const response = await api.patch(`/business/${businessId}/theme/reset`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error resetting business theme:", error);
+      throw error.response?.data || error;
+    }
+  };
