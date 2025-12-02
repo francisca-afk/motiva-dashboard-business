@@ -21,6 +21,7 @@ import Badge from '@/components/ui/badge/Badge';
 import ReactMarkdown from 'react-markdown';
 import { getConversationMessages } from '@/services/apiService';
 import { toast } from 'react-hot-toast';
+import { RefreshCw } from 'lucide-react';
 
 export default function SupportChatPage() {
   const params = useParams();
@@ -30,16 +31,17 @@ export default function SupportChatPage() {
     socket, 
     sendMessage,
     sendTypingIndicator,
-    acknowledgedSessions,
-    addAcknowledgedSession
+    userTypingSessions,
+    ackSessions
   } = useAppContext();
   
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const [conversationData, setConversationData] = useState(null);
   const [attachments, setAttachments] = useState([]);
   const [clientAcknowledged, setClientAcknowledged] = useState(false);
+  const [isUserTyping, setIsUserTyping] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -54,13 +56,19 @@ export default function SupportChatPage() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    setIsUserTyping(userTypingSessions.has(sessionId));
+  }, [userTypingSessions, sessionId]);
+
   // Load session data
   useEffect(() => {
     const loadConversation = async () => {
       try {
+        setLoading(true);
         const response = await getConversationMessages(sessionId);
         setConversationData(response.session);
         setMessages(response.messages || []);
+        setLoading(false);
       } catch (error) {
         console.error('Error loading conversation:', error);
       }
@@ -74,26 +82,34 @@ export default function SupportChatPage() {
 
   useEffect(() => {
     if (socket && sessionId) {
-      console.log(`Joining session: ${sessionId}`);
       socket.emit('join_conversation', sessionId);
     }
   
     return () => {
       if (socket && sessionId) {
-        console.log(`Leaving session: ${sessionId}`);
         socket.emit('leave_conversation', sessionId);
       }
     };
   }, [socket, sessionId])
 
-  // Check if already acknowledged from context
-  
+  // Check if the client was acknowledged by the human agent
   useEffect(() => {
-    if (!acknowledgedSessions.has(sessionId)) {
-      console.log('Client already acknowledged from context');
-      setClientAcknowledged(true);
-    }
-  }, [acknowledgedSessions, sessionId])
+    if (!ackSessions.has(sessionId)) return;
+
+    const shown = JSON.parse(localStorage.getItem("shownAck") || "[]");
+
+    // If the session was already shown, return
+    if (shown.includes(sessionId)) return;
+    
+    // Show the acknowledged notification
+    setClientAcknowledged(true);
+
+    // Save that the session was shown
+    const updated = [...shown, sessionId];
+    localStorage.setItem("shownAck", JSON.stringify(updated));
+
+}, [ackSessions, sessionId])
+  
 
   // WebSocket listeners
   useEffect(() => {
@@ -102,45 +118,17 @@ export default function SupportChatPage() {
     // Listen for new messages in this conversation
     const handleNewMessage = (data) => {
       if (data.sessionId === sessionId) {
+        setIsUserTyping(false);
         setMessages((prev) => [...prev, data.message]);
-        setIsTyping(false);
-      }
-      if (data.message.role !== "user") {
-        setClientAcknowledged(false);
+        //setIsTyping(false);
       }
     };
 
-    // Listen for typing indicator
-    const handleUserTyping = (data) => {
-      if (data.sessionId === sessionId && data.role === 'user') {
-        setIsTyping(true);
-      }
-    };
-
-    const handleUserStoppedTyping = (data) => {
-      if (data.sessionId === sessionId) {
-        setIsTyping(false);
-      }
-    };
-
-    const handleClientAcknowledgment = (data) => {
-      if (data.sessionId === sessionId && !acknowledgedSessions.has(sessionId)) {
-        console.log('Client acknowledged handoff in page:', data);
-        setClientAcknowledged(true);
-        addAcknowledgedSession(sessionId)
-      }
-    }
-    
-    socket.on('client_acknowledged_handoff', handleClientAcknowledgment);
     socket.on('new_message', handleNewMessage);
-    socket.on('user_typing', handleUserTyping);
-    socket.on('user_stopped_typing', handleUserStoppedTyping);
 
     return () => {
       socket.off('new_message', handleNewMessage);
-      socket.off('user_typing', handleUserTyping);
-      socket.off('user_stopped_typing', handleUserStoppedTyping);
-      socket.off('client_acknowledged_handoff', handleClientAcknowledgment)
+     
     };
   }, [socket, sessionId]);
 
@@ -176,19 +164,16 @@ export default function SupportChatPage() {
 
   const handleInputChange = (e) => {
     setInputMessage(e.target.value);
-    
     // Send typing indicator
     sendTypingIndicator(sessionId, true);
-    
     // Clear existing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-    
     // Set new timeout to stop typing
     typingTimeoutRef.current = setTimeout(() => {
       sendTypingIndicator(sessionId, false);
-    }, 1000);
+    }, 2000);
   };
 
   const handleFileSelect = (e) => {
@@ -203,6 +188,17 @@ export default function SupportChatPage() {
   const handleBack = () => {
     router.push('/conversations/inbox');
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen">
+        <RefreshCw className="h-5 w-5 animate-spin text-brand-500" />
+        <p className="text-gray-500 dark:text-gray-400 mt-2">
+          Loading conversation history...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -382,7 +378,7 @@ export default function SupportChatPage() {
             )}
 
             {/* Typing Indicator */}
-            {isTyping && (
+            {isUserTyping && (
               <div className="flex gap-3 justify-start">
                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-purple-500 flex items-center justify-center">
                   <User className="h-4 w-4 text-white" />

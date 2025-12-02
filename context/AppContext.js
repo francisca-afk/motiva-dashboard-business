@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { getBusinessById, getAlerts, getAlertBySessionId, getUserByToken } from "@/services/apiService";
 import { io } from "socket.io-client";
 import { useRouter, usePathname } from "next/navigation";
@@ -17,7 +17,13 @@ export const AppProvider = ({ children }) => {
   const [alerts, setAlerts] = useState([]);
   const [socket, setSocket] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [acknowledgedSessions, setAcknowledgedSessions] = useState(new Set());
+  const [userTypingSessions, setUserTypingSessions] = useState(new Set());
+  const [ackSessions, setAckSessions] = useState(new Set());
+
+  const addAckSession = (sessionId) => {
+    setAckSessions(prev => new Set([...prev, sessionId]));
+  };
+
   
   const pathname = usePathname();
   const router = useRouter();
@@ -35,7 +41,6 @@ export const AppProvider = ({ children }) => {
       try {
         const response = await getUserByToken(token);
         const userData = response.data;
-        console.log("userData", userData);
 
         setUser(userData);
         saveSession(userData, token);
@@ -54,7 +59,6 @@ export const AppProvider = ({ children }) => {
   }, []);
 
   const setSession = (userData, tokenData) => {
-    console.log("setting session", userData, tokenData);
     setUser(userData);
     setToken(tokenData);
     saveSession(userData, tokenData);
@@ -68,24 +72,17 @@ export const AppProvider = ({ children }) => {
     router.push("/signin");
   };
 
-  const addAcknowledgedSession = (sessionId) => {
-    setAcknowledgedSessions(prev => new Set([...prev, sessionId]))
-  }
-  
   useEffect(() => {
     if (!user || business || pathname === '/setup') return;
   
     const fetchBusiness = async () => {
       try {
-        console.log("user", user);
         if (!user.business) {
-          console.log("no business found, redirecting to setup");
           router.push("/setup");
           return;
         }
   
         const { data } = await getBusinessById(user.business);
-        console.log("data business", data);
         
         if (!data) {
           router.push("/setup");
@@ -106,9 +103,7 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     if (!business?._id) return;
     const fetchAlerts = async () => {
-      console.log("fetching alerts for business", business._id);
       const response = await getAlerts(business._id);
-      console.log("alerts", response.data);
       setAlerts(response.data || [])
     };
     fetchAlerts();
@@ -118,7 +113,6 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     if (!business?._id) return;
   
-    console.log(`Connecting to alerts via ws for business ${business._id}`);
     
     const socketInstance = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
       transports: ["websocket"],
@@ -131,15 +125,12 @@ export const AppProvider = ({ children }) => {
   
     // Business conversations room confirmation
     socketInstance.on("joined_business_conversations", ({ room }) => {
-      console.log(`✅ Joined business conversations room: ${room}`);
     });
 
     socketInstance.on("joined_alerts", ({ room }) => {
-      console.log(`✅ Successfully joined room: ${room}`);
     });
 
     socketInstance.on("new_conversation_message", (data) => {
-      console.log("💬 New message in conversation:", data);
       
       const { sessionId, message, sessionData } = data;
       const isInChatPage = pathname?.includes(`/support/chat/${sessionId}`);
@@ -152,12 +143,10 @@ export const AppProvider = ({ children }) => {
     })
 
     socketInstance.on("client_acknowledged_handoff", (data) => {
-      console.log("Client acknowledged handoff from app context:", data);
-      setAcknowledgedSessions(prev => new Set([...prev, data.sessionId]));
+      addAckSession(data.sessionId)
     })
   
     socketInstance.on("new_alert", (alert) => {
-      console.log("🔔 New alert received:", alert);
       setAlerts((prev) => [alert, ...prev]);
       
       // Show toast notification
@@ -169,13 +158,16 @@ export const AppProvider = ({ children }) => {
     });
 
     // User typing indicator
-    socketInstance.on("user_typing", (data) => {
-      console.log("⌨️ User typing:", data);
-      // Handle typing indicator
-    });
+    socketInstance.on("visitor_typing", ({ sessionId, isUserTyping }) => {
+      setUserTypingSessions(prev => {
+        const next = new Set(prev);
+        if (isUserTyping) next.add(sessionId);
+        else next.delete(sessionId);
+        return next;
+      });
+    })
 
     socketInstance.on("user_stopped_typing", (data) => {
-      console.log("⌨️ User stopped typing:", data);
       // Handle stopped typing
     });
   
@@ -202,7 +194,6 @@ export const AppProvider = ({ children }) => {
   
   const sendMessage = useCallback((sessionId, message) => {
     if (socket && sessionId) {
-      console.log(`📤 Sending message to conversation: ${sessionId}`);
       socket.emit("support_message", {
         sessionId,
         message
@@ -210,10 +201,11 @@ export const AppProvider = ({ children }) => {
     }
   }, [socket]);
   
-  const sendTypingIndicator = useCallback((sessionId, isTyping) => {
+  const sendTypingIndicator = useCallback((sessionId, isHumanAgentTyping) => {
     if (socket && sessionId) {
-      socket.emit(isTyping ? "support_typing" : "support_stopped_typing", {
-        sessionId
+      socket.emit('human_agent_typing', {
+        sessionId,
+        isHumanAgentTyping
       });
     }
   }, [socket]);
@@ -229,9 +221,9 @@ export const AppProvider = ({ children }) => {
         logout, 
         sendMessage, 
         sendTypingIndicator,
+        userTypingSessions,
         socket,
-        acknowledgedSessions,
-        addAcknowledgedSession
+        ackSessions
       }}
     >
       {children}

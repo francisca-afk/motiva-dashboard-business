@@ -63,22 +63,17 @@ const handleUpload = async () => {
     setErrorMessage("");
 
     //Upload file
-    console.log("📤 Uploading file:", selectedFile.name);
     const response = await uploadKnowledgeFile(business._id, selectedFile);
-    console.log("uploadResponse", response);
     const uploadResponse = response.data;
     const fileId = uploadResponse._id || uploadResponse.id;
     setUploadedFileId(fileId);
 
-    console.log("✅ File uploaded successfully:", fileId);
 
     // Process file
     setUploadStatus("processing");
-    console.log("Processing file:", fileId);
     await processKnowledgeFile(fileId);
 
     // Refresh file list after 2 seconds
-    console.log("✅ File processed successfully");
     setUploadStatus("success");
     setSelectedFile(null);
 

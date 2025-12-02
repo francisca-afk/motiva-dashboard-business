@@ -203,6 +203,9 @@ const handleSendEmail = async (sessionId, type) => {
         <div className="flex items-center justify-center py-12">
           <RefreshCw className="h-8 w-8 animate-spin text-brand-400" />
         </div>
+        <p className="text-gray-500 dark:text-gray-400 mt-2 text-center">
+          We are loading the conversations of your business! Please wait a moment...
+        </p>
       </div>
     );
   }
