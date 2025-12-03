@@ -369,6 +369,28 @@ export const generateChatResponse = async (payload) => {
       throw error.response?.data || error;
     }
   };
+
+  // Accept invitation
+  export const acceptInvitation = async (token) => {
+    try {
+      const response = await api.post(`/business-users/accept-invitation`, { token });
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error accepting invitation:', error);
+      throw error.response?.data || error;
+    }
+  };
+
+  // Verify invitation token
+  export const verifyInvitationToken = async (token) => {
+    try {
+      const response = await api.get(`/business-users/verify-invitation/${token}`);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error verifying invitation token:', error);
+      throw error.response?.data || error;
+    }
+  };
   
   // Obtener permisos y roles
   export const getPermissionsAndRoles = async () => {
