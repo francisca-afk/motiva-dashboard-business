@@ -302,3 +302,81 @@ export const generateChatResponse = async (payload) => {
       throw error.response?.data || error;
     }
   };
+
+
+  export const getBusinessUsers = async (businessId) => {
+    try {
+      const response = await api.get(`/business-users/${businessId}/users`);
+      console.log("business users");
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error fetching business users:', error);
+      throw error.response?.data || error;
+    }
+  };
+  
+  // Invitar usuario
+  export const inviteUser = async (businessId, inviteData) => {
+    try {
+      const response = await api.post(`/business-users/${businessId}/invite`, inviteData);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error inviting user:', error);
+      throw error.response?.data || error;
+    }
+  };
+  
+  // Actualizar rol de usuario
+  export const updateUserRole = async (businessId, userId, role) => {
+    try {
+      const response = await api.patch(`/business-users/${businessId}/users/${userId}/role`, { role });
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error updating user role:', error);
+      throw error.response?.data || error;
+    }
+  };
+  
+  // Eliminar usuario del business
+  export const removeUser = async (businessId, userId) => {
+    try {
+      const response = await api.delete(`/business-users/${businessId}/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error removing user:', error);
+      throw error.response?.data || error;
+    }
+  };
+  
+  // Reenviar invitación
+  export const resendInvitation = async (businessId, invitationId) => {
+    try {
+      const response = await api.post(`/business-users/${businessId}/invite/${invitationId}/resend`);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error resending invitation:', error);
+      throw error.response?.data || error;
+    }
+  };
+  
+  // Cancelar invitación
+  export const cancelInvitation = async (businessId, invitationId) => {
+    try {
+      const response = await api.delete(`/business-users/${businessId}/invite/${invitationId}`);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error canceling invitation:', error);
+      throw error.response?.data || error;
+    }
+  };
+  
+  // Obtener permisos y roles
+  export const getPermissionsAndRoles = async () => {
+    try {
+      const response = await api.get('/auth/permissions');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error fetching permissions:', error);
+      throw error.response?.data || error;
+    }
+  }

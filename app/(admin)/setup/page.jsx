@@ -9,9 +9,14 @@ import BusinessForm from './BusinessForm';
 
 export default function BusinessSetupPage() {
   const router = useRouter();
-  const { business, setBusiness } = useAppContext();
+  const { business, setBusiness, hasPermission, permissionsLoaded } = useAppContext();
   const [loading, setLoading] = useState(false);
   const isEditing = !!business;
+
+  if (!permissionsLoaded) return null;
+  if (!hasPermission('edit_business_settings')) {
+    return <PageGuard />;
+  }
 
   const handleSubmit = async (formData, setErrors) => {
     setLoading(true);

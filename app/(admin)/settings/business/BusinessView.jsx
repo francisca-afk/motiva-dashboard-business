@@ -19,8 +19,18 @@ import { getToneIcon, getSectorIcon, getSectorLabel } from '@/lib/business';
 import toast from 'react-hot-toast';
 import { updateBusinessTheme, resetBusinessTheme } from '@/services/apiService';
 import ThemeCustomizer from '@/components/settings/ThemeCustomizer';
-
+import PageGuard from "@/components/auth/PageGuard"
+import { useAppContext } from '@/context/AppContext';
 export default function BusinessView({ business, onEdit, showEdit = false }) {
+
+  const { hasPermission, permissionsLoaded } = useAppContext();
+
+  if (!permissionsLoaded) return null;
+
+  if (!hasPermission('view_settings')) {
+    return <PageGuard />;
+  }
+
   if ( !business) {
     return;
   }

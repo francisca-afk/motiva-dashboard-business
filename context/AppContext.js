@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
-import { getBusinessById, getAlerts, getAlertBySessionId, getUserByToken } from "@/services/apiService";
+import { getBusinessById, getAlerts, getAlertBySessionId, getUserByToken, getPermissionsAndRoles } from "@/services/apiService";
 import { io } from "socket.io-client";
 import { useRouter, usePathname } from "next/navigation";
 import { getValidToken, saveSession, clearSession } from "@/services/authService";
@@ -17,6 +17,10 @@ export const AppProvider = ({ children }) => {
   const [alerts, setAlerts] = useState([]);
   const [socket, setSocket] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentUserRole, setCurrentUserRole] = useState('');
+  const [currentUserPermissions, setCurrentUserPermissions] = useState(null);
+  const [permissions, setPermissions] = useState(null);
+  const [permissionsLoaded, setPermissionsLoaded] = useState(false);
   const [userTypingSessions, setUserTypingSessions] = useState(new Set());
   const [ackSessions, setAckSessions] = useState(new Set());
 
@@ -41,7 +45,7 @@ export const AppProvider = ({ children }) => {
       try {
         const response = await getUserByToken(token);
         const userData = response.data;
-
+        setCurrentUserRole(userData.role);
         setUser(userData);
         saveSession(userData, token);
       } catch (err) {
@@ -57,6 +61,28 @@ export const AppProvider = ({ children }) => {
 
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchPermissions = async () => {
+      const response = await getPermissionsAndRoles();
+      console.log("response permissions from api", response);
+      const { permissions, roles } = response.data;
+      // Get permissions for the logged-in user
+      const userPermissions = roles[user.role] || [];
+      console.log("userPermissions", userPermissions);
+      setCurrentUserPermissions(userPermissions);
+      console.log("permissions array", permissions);
+      setPermissions(permissions);
+      setPermissionsLoaded(true);
+    };
+  
+    fetchPermissions();
+  }, [user]);
+  
+  const hasPermission = (permission) => {
+    return currentUserPermissions?.includes(permission);
+  };
 
   const setSession = (userData, tokenData) => {
     setUser(userData);
@@ -214,8 +240,13 @@ export const AppProvider = ({ children }) => {
     <AppContext.Provider
       value={{ user, 
         token, 
+        currentUserRole,
         business, 
         alerts, 
+        currentUserPermissions,
+        permissions,
+        permissionsLoaded,
+        hasPermission,
         setSession, 
         setBusiness,
         logout, 

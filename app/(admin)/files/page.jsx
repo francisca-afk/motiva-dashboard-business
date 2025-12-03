@@ -11,9 +11,10 @@ import { FileIcon, TrashBinIcon, CheckCircleIcon, TimeIcon, DownloadIcon, AlertI
 import { Eye, Loader2, CheckCircle, Clock, AlertCircle, FileText, Trash } from "lucide-react";
 import FileInput from "@/components/form/input/FileInput";
 import Label from "@/components/form/Label";
+import PageGuard from "@/components/auth/PageGuard";
 
 export default function BusinessFiles() {
-  const { business } = useAppContext();
+  const { business, hasPermission, permissionsLoaded } = useAppContext();
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -21,6 +22,11 @@ export default function BusinessFiles() {
   const [uploadStatus, setUploadStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [uploadedFileId, setUploadedFileId] = useState(null);
+
+  if (!permissionsLoaded) return null;
+  if (!hasPermission('view_kb')) {
+    return <PageGuard />;
+  }
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   const ALLOWED_TYPES = [
@@ -165,6 +171,9 @@ const handleCancelUpload = () => {
     <div>
       <PageBreadcrumb pageTitle="Business Files" />
       <div className="space-y-6">
+    
+       { hasPermission('edit_kb') && (
+        <>
         {/* Upload Section */}
         <ComponentCard title="Upload Documents">
           <div className="space-y-4">
@@ -291,6 +300,9 @@ const handleCancelUpload = () => {
             )}
           </div>
         </ComponentCard>
+        </>
+        )}
+
         <ComponentCard title="Business Documents">
           {loading ? (
             <div className="flex items-center justify-center py-12">
@@ -400,6 +412,8 @@ const handleCancelUpload = () => {
                         </button>
                       )}
 
+                      { hasPermission('edit_kb') && (
+                        <>
                       <button
                         onClick={() => deleteFile(file._id)}
                         className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-error-600 hover:bg-error-50 dark:text-error-400 dark:hover:bg-error-500/10 transition-colors"
@@ -408,6 +422,8 @@ const handleCancelUpload = () => {
                         <Trash className="h-4 w-4" />
                         Delete
                       </button>
+                      </>
+                      )}
                     </div>
                   </td>
                 </>

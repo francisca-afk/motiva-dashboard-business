@@ -8,14 +8,19 @@ import DataTable from '@/components/tables/DataTable';
 import { useAppContext } from '@/context/AppContext';
 import useConversations from '@/hooks/useConversations';
 import ConversationRow from '@/components/conversations/ConversationRow';
-import { getConversationSummary, getConversationMessages, emailConversationSummary, takeOverSession, generateConversationSummary } from '@/services/apiService';
+import { getConversationSummary, 
+  getConversationMessages, 
+  emailConversationSummary, 
+  takeOverSession, 
+  generateConversationSummary } from '@/services/apiService';
+import PageGuard from "@/components/auth/PageGuard"
 import SummaryModal from '@/components/modals/SummaryModal';
 import ConversationHistoryModal from '@/components/modals/ConversationHistoryModal';
 import { toast } from 'react-hot-toast';
 import usePagination from '@/hooks/usePagination';
 
 export default function ConversationsPage() {
-  const { business } = useAppContext();
+  const { business, hasPermission, permissionsLoaded } = useAppContext();
   const { 
     sessions, 
     loading: initialLoading, 
@@ -34,15 +39,14 @@ export default function ConversationsPage() {
     title: '' 
   });
   const router = useRouter();
-  
-  /**
-  useEffect(() => {
-    if (sessions && Array.isArray(sessions)) {
-      console.log('sessions', sessions);
-      setIsLoading(false);
-    }
-  }, [sessions]);
-  */
+
+  if (!permissionsLoaded) return null;
+  console.log("permissionsLoaded", permissionsLoaded);
+  console.log("hasPermission", hasPermission);
+
+  if (!hasPermission('view_conversations')) {
+    return <PageGuard />;
+  }
 
   /**
    * Handle manual refresh
@@ -80,7 +84,6 @@ const handleSendEmail = async (sessionId, type) => {
     try {
       const emailData = { type }; // 'history' or 'summary'
       await emailConversationSummary(sessionId, emailData);
-      console.log(`✅ ${type} sent via email`);
     } catch (error) {
       console.error('Error sending email:', error);
       alert('Failed to send email. Please try again.');
@@ -93,8 +96,6 @@ const handleSendEmail = async (sessionId, type) => {
       if (!session) return;
   
       const response = await getConversationSummary(sessionId);
-      console.log('response DATA SUMMARY', response);
-      console.log('Summary fetched for session:', response);
       setSummaryModal({
         isOpen: true,
         summary: response.data.messages,
@@ -115,7 +116,6 @@ const handleSendEmail = async (sessionId, type) => {
       const response = await getConversationSummary(sessionId);
       if (!response) {
         const summaryResponse = await generateConversationSummary(sessionId);
-        console.log('Summary generated for session:', summaryResponse);
       }
       // Refresh to update the summary status
       await refreshConversations();
@@ -133,7 +133,6 @@ const handleSendEmail = async (sessionId, type) => {
   const handleIntervene = async (sessionId) => {
     try {
       const response = await takeOverSession(sessionId);
-      console.log('Session taken over:', response);
       router.push(`/conversations/support/${sessionId}`);
     } catch (error) {
       console.error('Error taking over session:');

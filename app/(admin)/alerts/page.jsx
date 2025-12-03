@@ -20,12 +20,16 @@ import DataTable from '@/components/tables/DataTable';
 import Badge from '@/components/ui/badge/Badge';
 import { useAppContext } from '@/context/AppContext';
 import ConversationHistoryModal from '@/components/modals/ConversationHistoryModal';
-import { getConversationMessages, emailConversationSummary, markAlertAsRead, markAlertAsResolved, deleteAlert } from '@/services/apiService';
-
+import { getConversationMessages, 
+  emailConversationSummary, 
+  markAlertAsRead, 
+  markAlertAsResolved, 
+  deleteAlert } from '@/services/apiService';
+import PageGuard from "@/components/auth/PageGuard"
 
 export default function AlertsPage() {
   const router = useRouter();
-  const { alerts = [], setAlerts } = useAppContext();
+  const { alerts = [], setAlerts, hasPermission, permissionsLoaded} = useAppContext();
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -35,6 +39,13 @@ export default function AlertsPage() {
     messages: [], 
     title: '' 
   });
+
+  if (!permissionsLoaded) return null;
+
+  if (!hasPermission('view_alerts')) {
+    return <PageGuard />;
+  }
+
   useEffect(() => {
     if (alerts && Array.isArray(alerts)) {
       setIsLoading(false);

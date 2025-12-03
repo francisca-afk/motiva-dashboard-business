@@ -63,6 +63,7 @@ const navItems = [
     name: "Settings",
     subItems: [
       { name: "Business", path: "/settings/business", pro: false },
+      { name: "Users", path: "/settings/users", pro: false },
     ],
   },
 ];

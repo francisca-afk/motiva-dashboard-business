@@ -32,9 +32,16 @@ export default function SupportChatPage() {
     sendMessage,
     sendTypingIndicator,
     userTypingSessions,
-    ackSessions
+    ackSessions,
+    hasPermission,
+    permissionsLoaded
   } = useAppContext();
   
+  if (!permissionsLoaded) return null;
+  if (!hasPermission('reply_conversations')) {
+    return <PageGuard />;
+  }
+
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [conversationData, setConversationData] = useState(null);
