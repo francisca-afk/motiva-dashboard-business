@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { acceptInvitation, verifyInvitationToken } from '@/services/apiService';
@@ -11,7 +12,7 @@ export default function AcceptInvitation() {
   const router = useRouter();
   const token = searchParams.get('token');
   
-  const [status, setStatus] = useState('loading'); // loading, form, success, error, expired
+  const [status, setStatus] = useState('loading'); 
   const [invitationData, setInvitationData] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
