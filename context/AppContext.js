@@ -66,13 +66,10 @@ export const AppProvider = ({ children }) => {
     if (!user) return;
     const fetchPermissions = async () => {
       const response = await getPermissionsAndRoles();
-      console.log("response permissions from api", response);
       const { permissions, roles } = response.data;
       // Get permissions for the logged-in user
       const userPermissions = roles[user.role] || [];
-      console.log("userPermissions", userPermissions);
       setCurrentUserPermissions(userPermissions);
-      console.log("permissions array", permissions);
       setPermissions(permissions);
       setPermissionsLoaded(true);
     };
@@ -212,7 +209,6 @@ export const AppProvider = ({ children }) => {
         socketInstance.emit("leave_alerts", business._id);
         socketInstance.emit("leave_business_conversations", business._id);
         socketInstance.disconnect();
-        console.log(`👋 Disconnected from WebSocket for business ${business._id}`);
       }
     };
   }, [business, pathname, router, token])
@@ -252,6 +248,7 @@ export const AppProvider = ({ children }) => {
         logout, 
         sendMessage, 
         sendTypingIndicator,
+        setCurrentUserRole,
         userTypingSessions,
         socket,
         ackSessions

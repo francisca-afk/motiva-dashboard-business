@@ -21,7 +21,7 @@ export default function SignInForm() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { setSession } = useAppContext();
+  const { setSession, setCurrentUserRole } = useAppContext();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -34,6 +34,8 @@ export default function SignInForm() {
     try {
       const data = await login(form.email, form.password);
       setSession(data.user, data.token);
+      setCurrentUserRole(data.user.role);
+      console.log("data from login", data);
       router.push("/dashboard");
     } catch (err) {
       console.error(err);
