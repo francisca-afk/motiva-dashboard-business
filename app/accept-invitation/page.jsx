@@ -1,13 +1,13 @@
 "use client";
-export const dynamic = "force-dynamic";
+import { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { acceptInvitation, verifyInvitationToken } from '@/services/apiService';
-import { Mail, Lock, User, CheckCircle, XCircle, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Mail, User, CheckCircle, XCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 
-export default function AcceptInvitation() {
+function AcceptInvitationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
@@ -65,7 +65,6 @@ export default function AcceptInvitation() {
     }
   };
 
-  // Loading state
   if (status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -77,7 +76,6 @@ export default function AcceptInvitation() {
     );
   }
 
-  // Success state
   if (status === 'success') {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -99,7 +97,6 @@ export default function AcceptInvitation() {
     );
   }
 
-  // Error/Expired state
   if (status === 'error' || status === 'expired') {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -126,11 +123,9 @@ export default function AcceptInvitation() {
     );
   }
 
-  // Form state
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-brand-50 to-purple-50 dark:from-brand-500/10 dark:to-purple-500/10 mb-4 border-4 border-brand-200 dark:border-brand-500/30">
             <Mail className="h-8 w-8 text-brand-600 dark:text-brand-400" />
@@ -148,10 +143,8 @@ export default function AcceptInvitation() {
           </div>
         </div>
 
-        {/* Form */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email (read-only) */}
             <div>
               <Label>Email</Label>
               <div className="relative">
@@ -165,7 +158,6 @@ export default function AcceptInvitation() {
               </div>
             </div>
 
-            {/* First Name */}
             <div>
               <Label>
                 First Name<span className="text-error-500">*</span>
@@ -183,7 +175,6 @@ export default function AcceptInvitation() {
               </div>
             </div>
 
-            {/* Last Name */}
             <div>
               <Label>
                 Last Name<span className="text-error-500">*</span>
@@ -201,7 +192,6 @@ export default function AcceptInvitation() {
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <Label>
                 Password<span className="text-error-500">*</span>
@@ -229,7 +219,6 @@ export default function AcceptInvitation() {
               </div>
             </div>
 
-            {/* Error */}
             {error && (
               <div className="flex items-center gap-2 p-3 rounded-lg bg-error-50 dark:bg-error-500/10 border border-error-200 dark:border-error-500/20">
                 <XCircle className="h-4 w-4 text-error-600 dark:text-error-400 flex-shrink-0" />
@@ -237,7 +226,6 @@ export default function AcceptInvitation() {
               </div>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -258,11 +246,22 @@ export default function AcceptInvitation() {
           </form>
         </div>
 
-        {/* Footer */}
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
           By creating an account, you agree to our Terms and Privacy Policy
         </p>
       </div>
     </div>
+  );
+}
+
+export default function AcceptInvitation() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Loader2 className="h-12 w-12 animate-spin text-brand-500" />
+      </div>
+    }>
+      <AcceptInvitationContent />
+    </Suspense>
   );
 }
