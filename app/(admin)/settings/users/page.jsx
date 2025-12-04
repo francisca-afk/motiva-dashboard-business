@@ -48,12 +48,14 @@ export default function UsersPage() {
   }, [business]);
 
   const loadData = async () => {
-    if(!business) return;
     setIsLoading(true);
     try {
+        console.log("business", business);
         const usersData = await getBusinessUsers(business?._id);
+        console.log('actul user', user);
         console.log('usersData', usersData);
-        const filteredUsers = usersData.data.users.filter(u => u._id !== user._id);
+        const filteredUsers = usersData.data.users.filter(u => u._id !== user.id);
+        console.log("filteredUsers", filteredUsers);
         setUsers(filteredUsers || []);
         setInvitations(usersData.data.invitations || []);
     } catch (error) {
@@ -127,15 +129,17 @@ export default function UsersPage() {
       </div>
     );
   }
-
+  console.log("users", users);
+  console.log("invitations", invitations);
   // Filter and search logic
   const allUsers = [...users, ...invitations.map(inv => ({
     ...inv,
     status: inv.status || 'pending',
     name: inv.invitedEmail || inv.email 
   }))];
-
+  console.log("allUsers", allUsers);
   const filteredUsers = allUsers.filter(user => {
+    console.log("user", user);
     const matchesSearch = 
       user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchQuery.toLowerCase());

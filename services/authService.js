@@ -91,7 +91,6 @@ const login = async (email, password) => {
       email,
       password,
     });
-
     return response.data;
   } catch (error) {
     if (error.response) {

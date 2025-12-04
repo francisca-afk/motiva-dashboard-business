@@ -11,7 +11,8 @@ function AcceptInvitationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
-  
+  console.log("token", token);
+
   const [status, setStatus] = useState('loading'); 
   const [invitationData, setInvitationData] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -25,6 +26,7 @@ function AcceptInvitationContent() {
 
   useEffect(() => {
     if (!token) {
+      console.log("no token");
       setStatus('error');
       return;
     }
@@ -34,8 +36,9 @@ function AcceptInvitationContent() {
   const verifyToken = async () => {
     try {
       const response = await verifyInvitationToken(token);
+      console.log("response verifyToken", response);
       setInvitationData(response.data);
-      setStatus('form');
+      setStatus(response.status);
     } catch (error) {
       if (error.response?.status === 410) {
         setStatus('expired');
@@ -55,7 +58,7 @@ function AcceptInvitationContent() {
     setIsSubmitting(true);
 
     try {
-      await acceptInvitation(token, form);
+      await acceptInvitation(token, form.firstName, form.lastName, form.password);
       setStatus('success');
       setTimeout(() => router.push('/signin'), 3000);
     } catch (err) {

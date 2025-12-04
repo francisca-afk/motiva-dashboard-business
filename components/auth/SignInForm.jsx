@@ -35,7 +35,6 @@ export default function SignInForm() {
       const data = await login(form.email, form.password);
       setSession(data.user, data.token);
       setCurrentUserRole(data.user.role);
-      console.log("data from login", data);
       router.push("/dashboard");
     } catch (err) {
       console.error(err);
@@ -177,7 +176,13 @@ export default function SignInForm() {
                   >
                     Forgot password?
                   </Link>
+                  
                 </div>
+                {error && (
+                  <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg dark:bg-red-900/20 dark:text-red-400">
+                    {error}
+                  </div>
+                )}
                 <div>
                   <Button type="submit" disabled={loading} className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600">
                     {loading ? "Signing in..." : "Sign in"}

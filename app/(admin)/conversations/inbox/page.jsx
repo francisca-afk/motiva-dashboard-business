@@ -41,8 +41,6 @@ export default function ConversationsPage() {
   const router = useRouter();
 
   if (!permissionsLoaded) return null;
-  console.log("permissionsLoaded", permissionsLoaded);
-  console.log("hasPermission", hasPermission);
 
   if (!hasPermission('view_conversations')) {
     return <PageGuard />;

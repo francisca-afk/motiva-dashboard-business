@@ -371,9 +371,9 @@ export const generateChatResponse = async (payload) => {
   };
 
   // Accept invitation
-  export const acceptInvitation = async (token) => {
+  export const acceptInvitation = async (token, firstName, lastName, password) => {
     try {
-      const response = await api.post(`/business-users/accept-invitation`, { token });
+      const response = await api.post(`/business-users/invite/accept`, { token, firstName, lastName, password });
       return response.data;
     } catch (error) {
       console.error('❌ Error accepting invitation:', error);
@@ -384,7 +384,8 @@ export const generateChatResponse = async (payload) => {
   // Verify invitation token
   export const verifyInvitationToken = async (token) => {
     try {
-      const response = await api.get(`/business-users/verify-invitation/${token}`);
+      console.log("verifying invitation token", token);
+      const response = await api.post(`/business-users/invite/verify`, {token});
       return response.data;
     } catch (error) {
       console.error('❌ Error verifying invitation token:', error);
