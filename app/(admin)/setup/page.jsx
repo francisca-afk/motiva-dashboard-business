@@ -13,11 +13,6 @@ export default function BusinessSetupPage() {
   const [loading, setLoading] = useState(false);
   const isEditing = !!business;
 
-  if (!permissionsLoaded) return null;
-  if (!hasPermission('edit_business_settings')) {
-    return <PageGuard />;
-  }
-
   const handleSubmit = async (formData, setErrors) => {
     setLoading(true);
     const loadingToast = toast.loading(isEditing ? 'Updating business...' : 'Creating your business...');

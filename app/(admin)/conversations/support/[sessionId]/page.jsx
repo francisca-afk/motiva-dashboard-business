@@ -51,10 +51,6 @@ export default function SupportChatPage() {
   const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
-  if (!permissionsLoaded) return null;
-  if (!hasPermission('reply_conversations')) {
-    return <PageGuard />;
-  }
 
   // Scroll to bottom
   const scrollToBottom = () => {
@@ -210,7 +206,7 @@ export default function SupportChatPage() {
   }
 
   return (
-    <>
+    <PageGuard permission="reply_conversations">
       <PageBreadcrumb 
         pageTitle={`Support Chat`} 
         breadcrumbItems={[
@@ -490,6 +486,6 @@ export default function SupportChatPage() {
           </div>
         </ComponentCard>
       </div>
-    </>
+    </PageGuard>
   );
 }

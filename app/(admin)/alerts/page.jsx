@@ -40,12 +40,6 @@ export default function AlertsPage() {
     title: '' 
   });
 
-  if (!permissionsLoaded) return null;
-
-  if (!hasPermission('view_alerts')) {
-    return <PageGuard />;
-  }
-
   useEffect(() => {
     if (alerts && Array.isArray(alerts)) {
       setIsLoading(false);
@@ -243,6 +237,7 @@ export default function AlertsPage() {
   }
 
   return (
+    <PageGuard permission="view_alerts">
     <div>
       <PageBreadcrumb pageTitle="Alerts" />
 
@@ -481,5 +476,6 @@ export default function AlertsPage() {
         onSendEmail={handleSendEmail}
       />
     </div>
+    </PageGuard>
   );
 }

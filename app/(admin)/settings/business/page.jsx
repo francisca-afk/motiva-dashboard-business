@@ -13,11 +13,6 @@ export default function BusinessSettingsPage() {
   const router = useRouter();
   const { business, setBusiness, loading, hasPermission, permissionsLoaded } = useAppContext();
 
-  if (!permissionsLoaded) return null;
-  if (!hasPermission('view_settings')) {
-    return <PageGuard />;
-  }
-
   if (loading && !business) {
     return <Loader2 className="h-8 w-8 animate-spin text-brand-400" />;
   }
@@ -27,7 +22,7 @@ export default function BusinessSettingsPage() {
   }
 
   return (
-    <>
+    <PageGuard permission="view_settings">
       <Toaster position="top-center" />
       <div>
         <PageBreadcrumb pageTitle="Business Settings" />
@@ -40,6 +35,6 @@ export default function BusinessSettingsPage() {
           />
         </div>
       </div>
-    </>
+    </PageGuard>
   );
 }

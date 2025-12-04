@@ -3,13 +3,17 @@ import { useAppContext } from "@/context/AppContext";
 import { ShieldAlert, ArrowLeft, Home } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function PageGuard() {
-  const { user } = useAppContext();
+export default function PageGuard({ permission, children }) {
+  const { hasPermission, permissionsLoaded, user } = useAppContext();
   const router = useRouter();
+
+  if (!permissionsLoaded) return null;
+
+  if (!hasPermission(permission)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
         <div className="max-w-md w-full">
-          {/* Icon */}
+
           <div className="flex justify-center mb-6">
             <div className="relative">
               <div className="absolute inset-0 bg-error-500/20 blur-2xl rounded-full"></div>
@@ -19,7 +23,6 @@ export default function PageGuard() {
             </div>
           </div>
 
-          {/* Content */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
               Access Denied
@@ -28,7 +31,7 @@ export default function PageGuard() {
               You don't have permission to view this page.
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-500">
-              Your current role:{" "}
+              Your current role:
               <span className="font-semibold capitalize text-error-600 dark:text-error-400">
                 {{
                   owner: "Owner",
@@ -39,7 +42,6 @@ export default function PageGuard() {
             </p>
           </div>
 
-          {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => router.back()}
@@ -48,6 +50,7 @@ export default function PageGuard() {
               <ArrowLeft className="h-4 w-4" />
               Go Back
             </button>
+
             <button
               onClick={() => router.push('/dashboard')}
               className="flex-1 px-6 py-3 rounded-lg bg-gradient-to-r from-brand-500 to-purple-500 text-white font-medium hover:from-brand-600 hover:to-purple-600 transition-all inline-flex items-center justify-center gap-2 shadow-lg"
@@ -56,7 +59,11 @@ export default function PageGuard() {
               Go to Dashboard
             </button>
           </div>
+
         </div>
       </div>
     );
   }
+
+  return children;
+}

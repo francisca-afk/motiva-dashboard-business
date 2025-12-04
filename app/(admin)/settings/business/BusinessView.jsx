@@ -22,10 +22,6 @@ import ThemeCustomizer from '@/components/settings/ThemeCustomizer';
 import { useAppContext } from '@/context/AppContext';
 export default function BusinessView({ business, onEdit, showEdit = false }) {
 
-  const { hasPermission, permissionsLoaded } = useAppContext();
-
- 
-
   if ( !business) {
     return;
   }

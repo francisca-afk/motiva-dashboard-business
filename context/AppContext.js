@@ -42,6 +42,7 @@ export const AppProvider = ({ children }) => {
     setToken(token);
 
     const fetchUser = async () => {
+      if(!token) return;
       try {
         const response = await getUserByToken(token);
         const userData = response.data;
@@ -82,6 +83,15 @@ export const AppProvider = ({ children }) => {
   };
 
   const setSession = (userData, tokenData) => {
+    //clear all local storage
+    setUser(null);
+    setBusiness(null);
+    setCurrentUserRole(null);
+    setCurrentUserPermissions(null);
+    setPermissions(null);
+    clearSession();
+
+
     setUser(userData);
     setToken(tokenData);
     saveSession(userData, tokenData);

@@ -36,12 +36,6 @@ export default function UsersPage() {
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  if (!permissionsLoaded) return null;
-  if (!hasPermission('manage_users')) {
-    return <PageGuard />;
-  }
-
-
   // Load data when business is available
   useEffect(() => {
     if(!business) return;
@@ -51,6 +45,7 @@ export default function UsersPage() {
   const loadData = async () => {
     setIsLoading(true);
     try {
+        console.log('user', user);
         console.log('loading data');
         const usersData = await getBusinessUsers(business?._id);
         console.log('usersData', usersData);
@@ -161,6 +156,7 @@ export default function UsersPage() {
   const canInviteUsers = currentUserRole === 'owner' || currentUserRole === 'admin';
 
   return (
+    <PageGuard permission="manage_users">
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
@@ -364,5 +360,6 @@ export default function UsersPage() {
         currentUserRole={currentUserRole}
       />
     </div>
+    </PageGuard>
   );
 }

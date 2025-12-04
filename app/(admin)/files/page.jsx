@@ -23,11 +23,6 @@ export default function BusinessFiles() {
   const [errorMessage, setErrorMessage] = useState("");
   const [uploadedFileId, setUploadedFileId] = useState(null);
 
-  if (!permissionsLoaded) return null;
-  if (!hasPermission('view_kb')) {
-    return <PageGuard />;
-  }
-
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   const ALLOWED_TYPES = [
     "application/pdf",
@@ -168,6 +163,7 @@ const handleCancelUpload = () => {
   };
 
   return (
+    <PageGuard permission="view_kb"> 
     <div>
       <PageBreadcrumb pageTitle="Business Files" />
       <div className="space-y-6">
@@ -433,5 +429,6 @@ const handleCancelUpload = () => {
         </ComponentCard>
       </div>
     </div>
+    </PageGuard>
   );
 }
