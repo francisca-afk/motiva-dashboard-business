@@ -22,6 +22,7 @@ import ReactMarkdown from 'react-markdown';
 import { getConversationMessages } from '@/services/apiService';
 import { toast } from 'react-hot-toast';
 import { RefreshCw } from 'lucide-react';
+import PageGuard from "@/components/auth/PageGuard"
 
 export default function SupportChatPage() {
   const params = useParams();
@@ -37,10 +38,6 @@ export default function SupportChatPage() {
     permissionsLoaded
   } = useAppContext();
   
-  if (!permissionsLoaded) return null;
-  if (!hasPermission('reply_conversations')) {
-    return <PageGuard />;
-  }
 
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -53,6 +50,11 @@ export default function SupportChatPage() {
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+
+  if (!permissionsLoaded) return null;
+  if (!hasPermission('reply_conversations')) {
+    return <PageGuard />;
+  }
 
   // Scroll to bottom
   const scrollToBottom = () => {

@@ -56,7 +56,6 @@ export default function UserCard({
   const [isUpdating, setIsUpdating] = useState(false);
   
   const roleConfig = ROLE_CONFIG[user.role] || ROLE_CONFIG.chatRep;
-  console.log("roleConfig", roleConfig);
   const statusConfig = STATUS_CONFIG[user.status] || STATUS_CONFIG.active;
   const StatusIcon = statusConfig.icon;
 
@@ -103,9 +102,9 @@ export default function UserCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                {user.name || 'Unnamed User'}
-              </h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                {user.status === 'pending' ? user.email : `${user.firstName} ${user.lastName}` || 'Unnamed User'}
+             </h3>
               <div className="flex items-center gap-2 mt-1">
                 <Mail className="h-3.5 w-3.5 text-gray-400" />
                 <p className="text-sm text-gray-600 dark:text-gray-400 truncate">

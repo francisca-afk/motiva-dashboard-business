@@ -23,14 +23,10 @@ import {
   getPermissionsAndRoles
 } from '@/services/apiService';
 import { useAppContext } from '@/context/AppContext';
+import PageGuard from "@/components/auth/PageGuard"
 
 export default function UsersPage() {
   const { business, user, currentUserRole, hasPermission, permissionsLoaded } = useAppContext();
-  
-  if (!permissionsLoaded) return null;
-  if (!hasPermission('manage_users')) {
-    return <PageGuard />;
-  }
 
   const [users, setUsers] = useState([]);
   const [invitations, setInvitations] = useState([]);
@@ -39,6 +35,11 @@ export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+
+  if (!permissionsLoaded) return null;
+  if (!hasPermission('manage_users')) {
+    return <PageGuard />;
+  }
 
 
   // Load data when business is available
@@ -50,13 +51,11 @@ export default function UsersPage() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-        console.log("business", business);
+        console.log('loading data');
         const usersData = await getBusinessUsers(business?._id);
-        console.log('actul user', user);
         console.log('usersData', usersData);
-        const filteredUsers = usersData.data.users.filter(u => u._id !== user.id);
-        console.log("filteredUsers", filteredUsers);
-        setUsers(filteredUsers || []);
+       
+        setUsers(usersData.data.users || []);
         setInvitations(usersData.data.invitations || []);
     } catch (error) {
         toast.error('Failed to load users');
@@ -129,19 +128,19 @@ export default function UsersPage() {
       </div>
     );
   }
-  console.log("users", users);
-  console.log("invitations", invitations);
   // Filter and search logic
-  const allUsers = [...users, ...invitations.map(inv => ({
-    ...inv,
-    status: inv.status || 'pending',
-    name: inv.invitedEmail || inv.email 
-  }))];
-  console.log("allUsers", allUsers);
+  const allUsers = [
+    ...users.map(u => ({ ...u, isYou: u._id === user._id })), 
+    ...invitations.filter(inv => inv.status === 'pending').map(inv => ({
+      ...inv,
+      status: 'pending',
+      name: inv.email
+    }))
+  ]
   const filteredUsers = allUsers.filter(user => {
-    console.log("user", user);
     const matchesSearch = 
-      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesRole = filterRole === 'all' || user.role === filterRole;

@@ -7,6 +7,7 @@ import PageBreadcrumb from '@/components/common/PageBreadCrumb';
 import { useAppContext } from '@/context/AppContext';
 import BusinessView from './BusinessView';
 import { Loader2 } from 'lucide-react';
+import PageGuard from "@/components/auth/PageGuard"
 
 export default function BusinessSettingsPage() {
   const router = useRouter();

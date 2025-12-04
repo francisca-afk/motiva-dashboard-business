@@ -28,7 +28,14 @@ export default function PageGuard() {
               You don't have permission to view this page.
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-500">
-              Your current role: <span className="font-semibold capitalize text-error-600 dark:text-error-400">{user?.role || 'Unknown'}</span>
+              Your current role:{" "}
+              <span className="font-semibold capitalize text-error-600 dark:text-error-400">
+                {{
+                  owner: "Owner",
+                  admin: "Administrator",
+                  chatRep: "Chat Representative"
+                }[user?.role] || "Unknown"}
+              </span>
             </p>
           </div>
 
