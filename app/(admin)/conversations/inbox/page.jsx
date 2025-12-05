@@ -31,7 +31,7 @@ export default function ConversationsPage() {
   const { currentPage, totalPages, paginatedData, goToPage } = usePagination(sessions, 10)
   const [generatingSummary, setGeneratingSummary] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [summaryModal, setSummaryModal] = useState({ isOpen: false, summary: null, title: '' });
   const [historyModal, setHistoryModal] = useState({ 
     isOpen: false, 
@@ -40,11 +40,6 @@ export default function ConversationsPage() {
   });
   const router = useRouter();
 
-  if (!permissionsLoaded) return null;
-
-  if (!hasPermission('view_conversations')) {
-    return <PageGuard />;
-  }
 
   /**
    * Handle manual refresh
@@ -60,6 +55,7 @@ export default function ConversationsPage() {
    */
   const handleViewDetails = async (sessionId) => {
     try {
+      setIsLoading(true);
         const session = sessions.find(s => s._id === sessionId);
         if (!session) return;
 
@@ -72,6 +68,8 @@ export default function ConversationsPage() {
     } catch (error) {
         console.error('Error fetching messages:', error);
         alert('Failed to load conversation history. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
  };
 
@@ -90,10 +88,12 @@ const handleSendEmail = async (sessionId, type) => {
 
   const handleViewSummary = async (sessionId) => {
     try {
+      setIsLoading(true);
       const session = sessions.find(s => s._id === sessionId);
       if (!session) return;
-  
+      console.log('getting summary for session', session);
       const response = await getConversationSummary(sessionId);
+      console.log('response summary', response);
       setSummaryModal({
         isOpen: true,
         summary: response.data.messages,
@@ -102,6 +102,8 @@ const handleSendEmail = async (sessionId, type) => {
     } catch (error) {
       console.error('Error fetching summary:', error);
       alert('Failed to load summary. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -110,6 +112,7 @@ const handleSendEmail = async (sessionId, type) => {
    */
   const handleGenerateSummary = async (sessionId) => {
     try {
+      setIsLoading(true);
       setGeneratingSummary(sessionId);
       const response = await getConversationSummary(sessionId);
       if (!response) {
@@ -122,6 +125,7 @@ const handleSendEmail = async (sessionId, type) => {
       alert('Failed to generate summary. Please try again.');
     } finally {
       setGeneratingSummary(null);
+      setIsLoading(false);
     }
   };
 
@@ -207,7 +211,22 @@ const handleSendEmail = async (sessionId, type) => {
     );
   }
 
+  if (isLoading) {
+    return (
+      <div>
+        <PageBreadcrumb pageTitle="Conversations" />
+        <div className="flex items-center justify-center py-12">
+          <RefreshCw className="h-8 w-8 animate-spin text-brand-400" />
+        </div>
+        <p className="text-gray-500 dark:text-gray-400 mt-2 text-center">
+           We are looking the information you requested! 🧐 Please wait a moment...
+        </p>
+      </div>
+    );
+  }
+
   return (
+    <PageGuard permission="view_conversations">
     <div>
       <PageBreadcrumb pageTitle="Conversations" />
       
@@ -375,12 +394,13 @@ const handleSendEmail = async (sessionId, type) => {
             }}
         />
       {/* Summary Modal */}
-        <SummaryModal
+        <SummaryModal className="mt-2 mb-2"
             isOpen={summaryModal.isOpen}
             onClose={() => setSummaryModal({ isOpen: false, summary: null, title: '' })}
             summary={summaryModal.summary}
             sessionTitle={summaryModal.title}
         />        
     </div>
+    </PageGuard>
   );
 }

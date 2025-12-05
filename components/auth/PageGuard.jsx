@@ -7,7 +7,7 @@ export default function PageGuard({ permission, children }) {
   const { hasPermission, permissionsLoaded, user } = useAppContext();
   const router = useRouter();
 
-  if (!permissionsLoaded) return null;
+  if (!permissionsLoaded || !user) return null;
 
   if (!hasPermission(permission)) {
     return (
